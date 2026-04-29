@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicPath India | Interactive Election Navigator</title>
+    <meta name="description" content="An interactive, gamified journey to understand the Indian election process.">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div id="app-container">
+        <!-- Background Elements -->
+        <div class="bg-gradient"></div>
+        <div class="bg-mesh"></div>
+
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <i class="fa-solid fa-map-location-dot"></i>
+                <h1>CivicPath <span>India</span></h1>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar" id="main-progress"></div>
+            </div>
+            <nav style="display:flex; gap:10px;">
+                <button class="nav-btn learning-btn" onclick="app.openSimulation('sim-learning')"><i class="fa-solid fa-graduation-cap"></i> New Voter Basics</button>
+                <button class="nav-btn" onclick="app.resetJourney()"><i class="fa-solid fa-rotate-right"></i> Restart</button>
+            </nav>
+        </header>
+
+        <!-- Main Content Layout -->
+        <main class="layout">
+            
+            <!-- Timeline Section (Left/Center) -->
+            <section class="timeline-container" id="timeline-scroll-area">
+                <div class="timeline-path"></div>
+                <!-- Journey Stages will be injected here by JS -->
+                <div id="stages-container"></div>
+            </section>
+
+            <!-- Contextual Assistant (Right Panel) -->
+            <aside class="assistant-panel">
+                <div class="assistant-header">
+                    <div class="assistant-avatar">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div>
+                        <h3>The Guide</h3>
+                        <span class="status online">Online</span>
+                    </div>
+                </div>
+                
+                <div class="chat-container" id="chat-history">
+                    <!-- Messages go here -->
+                </div>
+
+                <div class="quick-prompts" id="quick-prompts">
+                    <!-- Dynamic prompts based on current stage -->
+                </div>
+
+                <div class="chat-input-area">
+                    <input type="text" id="chat-input" placeholder="Ask about this stage..." onkeypress="app.handleChatInput(event)">
+                    <button class="send-btn" onclick="app.sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </aside>
+            
+        </main>
+
+        <!-- Modal for Simulations / Deep Dives -->
+        <div id="simulation-modal" class="modal hidden">
+            <div class="modal-content glass-panel">
+                <button class="close-btn" onclick="app.closeModal()">&times;</button>
+                <div id="modal-body"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
