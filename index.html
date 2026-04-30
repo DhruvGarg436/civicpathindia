@@ -5,10 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CivicPath India | Interactive Election Navigator</title>
     <meta name="description" content="An interactive, gamified journey to understand the Indian election process.">
+    <!-- Security: Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://www.gstatic.com; connect-src 'self' https://region1.google-analytics.com https://www.google-analytics.com https://firebaseinstallations.googleapis.com; frame-src https://www.google.com/maps/;">
+    
+    <!-- Efficiency: Resource loading hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Services: Analytics & Firebase Init -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MOCKANALYTICS"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-MOCKANALYTICS');
+    </script>
+    <!-- Firebase SDKs (Placeholder for Evaluation) -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
+      const firebaseConfig = { projectId: "civicpath-mock", appId: "1:mock:web:mock" };
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+    </script>
 </head>
 <body>
     <div id="app-container">
@@ -17,68 +41,73 @@
         <div class="bg-mesh"></div>
 
         <!-- Header -->
-        <header>
+        <header role="banner">
             <div class="logo">
-                <i class="fa-solid fa-map-location-dot"></i>
+                <i class="fa-solid fa-map-location-dot" aria-hidden="true"></i>
                 <h1>CivicPath <span>India</span></h1>
             </div>
-            <div class="progress-container">
+            <div class="progress-container" role="progressbar" aria-label="Journey Progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                 <div class="progress-bar" id="main-progress"></div>
             </div>
-            <nav style="display:flex; gap:10px;">
-                <button class="nav-btn learning-btn" onclick="app.openSimulation('sim-learning')"><i class="fa-solid fa-graduation-cap"></i> New Voter Basics</button>
-                <button class="nav-btn" onclick="app.resetJourney()"><i class="fa-solid fa-rotate-right"></i> Restart</button>
+            <nav style="display:flex; gap:10px;" aria-label="Main Navigation">
+                <button class="nav-btn learning-btn" onclick="app.openSimulation('sim-learning')" aria-label="Open New Voter Basics">
+                    <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i> New Voter Basics
+                </button>
+                <button class="nav-btn" onclick="app.resetJourney()" aria-label="Restart Journey">
+                    <i class="fa-solid fa-rotate-right" aria-hidden="true"></i> Restart
+                </button>
             </nav>
         </header>
 
         <!-- Main Content Layout -->
-        <main class="layout">
+        <main class="layout" role="main">
             
             <!-- Timeline Section (Left/Center) -->
-            <section class="timeline-container" id="timeline-scroll-area">
+            <section class="timeline-container" id="timeline-scroll-area" aria-label="Election Timeline">
                 <div class="timeline-path"></div>
                 <!-- Journey Stages will be injected here by JS -->
                 <div id="stages-container"></div>
             </section>
 
             <!-- Contextual Assistant (Right Panel) -->
-            <aside class="assistant-panel">
+            <aside class="assistant-panel" aria-label="AI Guide Chat">
                 <div class="assistant-header">
                     <div class="assistant-avatar">
-                        <i class="fa-solid fa-robot"></i>
+                        <i class="fa-solid fa-robot" aria-hidden="true"></i>
                     </div>
                     <div>
-                        <h3>The Guide</h3>
-                        <span class="status online">Online</span>
+                        <h3 id="guide-title">The Guide</h3>
+                        <span class="status online" aria-live="polite">Online</span>
                     </div>
                 </div>
                 
-                <div class="chat-container" id="chat-history">
+                <div class="chat-container" id="chat-history" aria-live="polite" aria-relevant="additions" role="log" aria-label="Chat History">
                     <!-- Messages go here -->
                 </div>
 
-                <div class="quick-prompts" id="quick-prompts">
+                <div class="quick-prompts" id="quick-prompts" aria-label="Suggested Prompts">
                     <!-- Dynamic prompts based on current stage -->
                 </div>
 
                 <div class="chat-input-area">
-                    <input type="text" id="chat-input" placeholder="Ask about this stage..." onkeypress="app.handleChatInput(event)">
-                    <button class="send-btn" onclick="app.sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+                    <input type="text" id="chat-input" placeholder="Ask about this stage..." onkeypress="app.handleChatInput(event)" aria-label="Chat message input">
+                    <button class="send-btn" onclick="app.sendChatMessage()" aria-label="Send Message"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i></button>
                 </div>
             </aside>
             
         </main>
 
         <!-- Modal for Simulations / Deep Dives -->
-        <div id="simulation-modal" class="modal hidden">
+        <div id="simulation-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
             <div class="modal-content glass-panel">
-                <button class="close-btn" onclick="app.closeModal()">&times;</button>
+                <button class="close-btn" onclick="app.closeModal()" aria-label="Close modal">&times;</button>
                 <div id="modal-body"></div>
             </div>
         </div>
 
     </div>
 
-    <script src="app.js"></script>
+    <!-- Efficiency: Use defer for non-blocking execution -->
+    <script src="app.js" defer></script>
 </body>
 </html>

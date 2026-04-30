@@ -1,0 +1,16 @@
+{
+  "name": "civicpath-india",
+  "version": "1.0.0",
+  "description": "CivicPath India - Interactive Election Navigator",
+  "main": "app.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "jest-environment-jsdom": "^29.0.0"
+  },
+  "jest": {
+    "testEnvironment": "jsdom"
+  }
+}

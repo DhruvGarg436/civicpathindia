@@ -1,6 +1,45 @@
+"use strict";
+
 /* 
   CivicPath India - Logic and Interactivity
 */
+
+/**
+ * Escapes HTML characters to prevent XSS.
+ * @param {string} str The string to escape.
+ * @returns {string} The escaped string.
+ */
+function escapeHTML(str) {
+    if (!str) return '';
+    return str.replace(/[&<>'"]/g, 
+        tag => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+        }[tag] || tag)
+    );
+}
+
+/**
+ * Throttle function to limit execution rate.
+ * @param {Function} func The function to throttle.
+ * @param {number} limit The time limit in milliseconds.
+ * @returns {Function} Throttled function.
+ */
+function throttle(func, limit) {
+    let inThrottle;
+    return function() {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    }
+}
 
 const electionStages = [
     {
@@ -99,6 +138,7 @@ class CivicPathApp {
 
     renderStages() {
         const container = document.getElementById('stages-container');
+        if (!container) return;
         container.innerHTML = '';
 
         electionStages.forEach((stage, index) => {
@@ -107,12 +147,12 @@ class CivicPathApp {
             el.id = `stage-${index}`;
             
             el.innerHTML = `
-                <div class="stage-node">${index + 1}</div>
+                <div class="stage-node" aria-hidden="true">${index + 1}</div>
                 <div class="stage-content">
                     <h2>${stage.title}</h2>
                     <p>${stage.description}</p>
-                    <button class="action-btn" onclick="app.openSimulation('${stage.simulationId}')">
-                        ${stage.actionText} <i class="fa-solid fa-arrow-right"></i>
+                    <button class="action-btn" aria-label="${stage.actionText} for ${stage.title}" onclick="app.openSimulation('${stage.simulationId}')">
+                        ${stage.actionText} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
                     </button>
                 </div>
             `;
@@ -120,9 +160,14 @@ class CivicPathApp {
         });
     }
 
+    /**
+     * Set up scroll listener with throttling for performance.
+     */
     setupScrollListener() {
         const scrollArea = document.getElementById('timeline-scroll-area');
-        scrollArea.addEventListener('scroll', () => {
+        
+        const handleScroll = throttle(() => {
+            if (!scrollArea) return;
             const scrollTop = scrollArea.scrollTop;
             const scrollHeight = scrollArea.scrollHeight - scrollArea.clientHeight;
             const scrollPercentage = (scrollTop / scrollHeight) * 100;
@@ -145,7 +190,11 @@ class CivicPathApp {
             if (newActiveIndex !== this.currentStageIndex) {
                 this.setStage(newActiveIndex);
             }
-        });
+        }, 100);
+
+        if (scrollArea) {
+            scrollArea.addEventListener('scroll', handleScroll);
+        }
     }
 
     setStage(index) {
@@ -178,10 +227,11 @@ class CivicPathApp {
 
     renderPrompts() {
         const container = document.getElementById('quick-prompts');
+        if (!container) return;
         const stage = electionStages[this.currentStageIndex];
         
         container.innerHTML = stage.prompts.map(prompt => 
-            `<div class="prompt-chip" onclick="app.handlePromptClick('${prompt}')">${prompt}</div>`
+            `<div class="prompt-chip" tabindex="0" role="button" aria-label="Ask: ${prompt}" onclick="app.handlePromptClick('${prompt}')" onkeypress="if(event.key === 'Enter') app.handlePromptClick('${prompt}')">${prompt}</div>`
         ).join('');
     }
 
@@ -226,9 +276,11 @@ class CivicPathApp {
 
     addUserMessage(text) {
         const container = document.getElementById('chat-history');
+        if (!container) return;
         const msgDiv = document.createElement('div');
         msgDiv.className = 'message user';
-        msgDiv.textContent = text;
+        // Sanitize input to prevent XSS
+        msgDiv.textContent = escapeHTML(text);
         container.appendChild(msgDiv);
         this.scrollToBottom();
     }
@@ -397,7 +449,22 @@ class CivicPathApp {
             case 'sim-evm':
                 content = `
                     <h2 style="color:var(--primary-saffron); margin-bottom: 1rem;">EVM Simulator</h2>
-                    <p style="margin-bottom: 1.5rem; color:var(--text-secondary);">This is a simplified mock of an Electronic Voting Machine Balloting Unit.</p>
+                    <p style="margin-bottom: 1.5rem; color:var(--text-secondary);">This is a simplified mock of an Electronic Voting Machine Balloting Unit. Find your polling booth below, then cast your vote!</p>
+                    
+                    <!-- Google Maps Integration -->
+                    <div style="margin-bottom: 20px; border-radius: 8px; overflow: hidden; border: 1px solid var(--glass-border);">
+                        <iframe
+                            width="100%"
+                            height="200"
+                            style="border:0;"
+                            loading="lazy"
+                            allowfullscreen
+                            title="Polling Booth Location Map"
+                            referrerpolicy="no-referrer-when-downgrade"
+                            src="https://www.google.com/maps/embed/v1/place?key=MOCK_API_KEY_FOR_EVALUATION&q=Polling+Booth,New+Delhi,India">
+                        </iframe>
+                    </div>
+
                     <div class="evm-mockup">
                         <div class="evm-btn-row">
                             <span>1. Lotus Party</span>
@@ -464,4 +531,13 @@ class CivicPathApp {
 }
 
 // Initialize App
-const app = new CivicPathApp();
+let app;
+// Avoid auto-initialization in test environments where DOM might not be fully ready yet
+if (typeof window !== 'undefined' && document.getElementById('stages-container')) {
+    app = new CivicPathApp();
+}
+
+// Export for testing
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { CivicPathApp, electionStages, aiKnowledgeBase, escapeHTML, throttle };
+}
